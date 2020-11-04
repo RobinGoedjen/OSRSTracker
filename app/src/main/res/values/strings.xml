@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">OSRSTracker</string>
-    <string name="Greeting">Please enter your OSRS ingame name:</string>
+    <string name="Greeting">Please enter your OSRS ingame name</string>
     <string name="username">Username</string>
 </resources>
