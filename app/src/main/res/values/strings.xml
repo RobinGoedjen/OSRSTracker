@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">OSRSTracker</string>
+    <string name="Greeting">Please enter your OSRS ingame name:</string>
+</resources>
