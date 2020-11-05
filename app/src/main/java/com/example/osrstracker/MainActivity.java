@@ -25,14 +25,14 @@ public class MainActivity extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    setContentView(R.layout.activity_statistics);
+                    //setContentView(R.layout.activity_statistics);
+                    RequestClient.fetchPlayer(userNameEdit.getText().toString());
                     handled = true;
                 }
                 return handled;
             }
         });
 
-
-
     }
+
 }
