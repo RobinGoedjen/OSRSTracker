@@ -8,8 +8,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.Console;
-
 public class MainActivity extends AppCompatActivity {
 
     private EditText userNameEdit;
@@ -26,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     //setContentView(R.layout.activity_statistics);
-                    RequestClient.fetchPlayer(userNameEdit.getText().toString());
+
+                    new HttpRequestTask().execute(userNameEdit.getText().toString());
                     handled = true;
                 }
                 return handled;
