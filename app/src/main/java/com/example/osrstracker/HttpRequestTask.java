@@ -49,6 +49,6 @@ public class HttpRequestTask extends AsyncTask<String, Void, String> {
     }
 
     protected void onPostExecute(String response) {
-        listener.OnHttpRequestComplete(response, responseCode);
+        listener.onHttpRequestComplete(response, responseCode);
     }
 }
