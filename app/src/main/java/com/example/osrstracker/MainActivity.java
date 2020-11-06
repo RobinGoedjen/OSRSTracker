@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements OnHttpRequestCompleteListener{
 
@@ -29,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     currentUser = userNameEdit.getText().toString();
                     new HttpRequestTask(MainActivity.this).execute(currentUser);
-                    handled = true;
                 }
                 return handled;
             }
@@ -42,28 +42,23 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
         if (responseCode != 200 || response == null) {
             String dialogMessage;
             if (responseCode == 404)
-                dialogMessage = "User has not been found.";
+                dialogMessage = "User has not been found";
             else
-                dialogMessage = "Please check if you have an active internet Connection.";
-            createDialog("An Error occured", dialogMessage).show();
+                dialogMessage = "Please check if you have an active internet Connection";
+            Toast.makeText(MainActivity.this, dialogMessage, Toast.LENGTH_LONG).show();
             return;
         }
-        Log.i("HTTP", response);
-        if (!(DatabaseManager.registerUser(currentUser) && DatabaseManager.addTimestamp(currentUser, response))) {
-            createDialog("An unexpected Error occured", "The response content is erroneous").show();
+        DatabaseManager databaseManager = new DatabaseManager(MainActivity.this);
+        if (!databaseManager.registerUser(currentUser)) {
+            Toast.makeText(MainActivity.this, "Failed to register User", Toast.LENGTH_LONG).show();
             return;
         }
-        //Auf antwort warten
-        //Umschalten
-        setContentView(R.layout.activity_statistics);
+        if (!databaseManager.addTimestamp(currentUser, response)) {
+            Toast.makeText(MainActivity.this, "Failed to create Timestamp", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        //setContentView(R.layout.activity_statistics);
     }
 
-    private AlertDialog createDialog(String title, String content) {
-        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        alertDialog.setTitle(title);
-        alertDialog.setMessage(content);
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                (dialog, which) -> dialog.dismiss());
-        return alertDialog;
-    }
 }
