@@ -14,7 +14,13 @@ public class HttpRequestTask extends AsyncTask<String, Void, String> {
 
     private static final String reqeustURL = "https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=";
     private Exception exception = null;
+    private int responseCode;
+    private String response = null;
+    private final OnHttpRequestCompleteListener listener;
 
+    public HttpRequestTask(OnHttpRequestCompleteListener listener){
+        this.listener = listener;
+    }
     @Override
     protected String doInBackground(String... strings) {
         try {
@@ -23,18 +29,14 @@ public class HttpRequestTask extends AsyncTask<String, Void, String> {
             urlConnection.setRequestMethod("GET");
             Log.i("HTTP", "Attempting HTTP request...");
             try {
+                responseCode = urlConnection.getResponseCode();
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                int responseCode = urlConnection.getResponseCode();
                 Log.i("HTTP", "Response Code: " + responseCode);
-                if (responseCode != 200)
-                    return null;
 
-                String response = null;
                 try (Scanner scanner = new Scanner(in, StandardCharsets.UTF_8.name())) {
                     response =  scanner.useDelimiter("\\A").next();
                 }
                 in.close();
-                return response;
             } finally {
                 urlConnection.disconnect();
             }
@@ -43,17 +45,10 @@ public class HttpRequestTask extends AsyncTask<String, Void, String> {
             exception = e;
             Log.e("HTTP", e.getMessage());
         }
-        return null;
+        return response;
     }
 
     protected void onPostExecute(String response) {
-        if (exception != null || response == null) {
-            //handle exception
-            return;
-        }
-
-        Log.i("HTTP", response);
-        //handle response
-        //maybe call Event????
+        listener.OnHttpRequestComplete(response, responseCode);
     }
 }
