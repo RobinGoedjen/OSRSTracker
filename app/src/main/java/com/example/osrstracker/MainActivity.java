@@ -48,6 +48,10 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
             Toast.makeText(MainActivity.this, dialogMessage, Toast.LENGTH_LONG).show();
             return;
         }
+        new PlayerStats(response);
+
+        /*
+
         DatabaseManager databaseManager = new DatabaseManager(MainActivity.this);
         if (!databaseManager.registerUser(currentUser)) {
             Toast.makeText(MainActivity.this, "Failed to register User", Toast.LENGTH_LONG).show();
@@ -57,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
             Toast.makeText(MainActivity.this, "Failed to create Timestamp", Toast.LENGTH_LONG).show();
             return;
         }
+
+         */
 
         //setContentView(R.layout.activity_statistics);
     }
