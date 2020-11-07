@@ -48,22 +48,20 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
             Toast.makeText(MainActivity.this, dialogMessage, Toast.LENGTH_LONG).show();
             return;
         }
-        new PlayerStats(response);
+        PlayerStats newPlayer = new PlayerStats(response);
 
-        /*
 
         DatabaseManager databaseManager = new DatabaseManager(MainActivity.this);
         if (!databaseManager.registerUser(currentUser)) {
             Toast.makeText(MainActivity.this, "Failed to register User", Toast.LENGTH_LONG).show();
             return;
         }
-        if (!databaseManager.addTimestamp(currentUser, response)) {
+        if (!databaseManager.addTimestamp(currentUser, newPlayer)) {
             Toast.makeText(MainActivity.this, "Failed to create Timestamp", Toast.LENGTH_LONG).show();
             return;
         }
 
-         */
-
+        Toast.makeText(MainActivity.this, "SUCCESS!!!!", Toast.LENGTH_LONG).show();
         //setContentView(R.layout.activity_statistics);
     }
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -14,7 +15,9 @@ public class DatabaseManager extends SQLiteOpenHelper {
     private static final String SKILL_TB = "SKILL_TB";
     private static final String COLUMN_ID = "ID";
     private static final String COLUMN_NAME = "Name";
+    private static final String COLUMN_USER_ID = "UserID";
     private static final String COLUMN_CREATION_TIME = "CreationTime";
+
     private static final String COLUMN_OVERALL_RANK = "Overall_Rank";
     private static final String COLUMN_OVERALL_XP = "Overall_XP";
     private static final String COLUMN_ATTACK_RANK = "Attack_Rank";
@@ -23,6 +26,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
     private static final String COLUMN_DEFENCE_XP = "Defence_XP";
     private static final String COLUMN_STRENGTH_RANK = "Strength_Rank";
     private static final String COLUMN_STRENGTH_XP = "Strength_XP";
+    private static final String COLUMN_HITPOINTS_RANK = "Hitpoints_Rank";
+    private static final String COLUMN_HITPOINTS_XP = "Hitpoints_XP";
     private static final String COLUMN_RANGED_RANK = "Ranged_Rank";
     private static final String COLUMN_RANGED_XP = "Ranged_XP";
     private static final String COLUMN_PRAYER_RANK = "Prayer_Rank";
@@ -39,6 +44,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
     private static final String COLUMN_FISHING_XP = "Fishing_XP";
     private static final String COLUMN_FIREMAKING_RANK = "Firemaking_Rank";
     private static final String COLUMN_FIREMAKING_XP = "Firemaking_XP";
+    private static final String COLUMN_CRAFTING_RANK = "Crafting_Rank";
+    private static final String COLUMN_CRAFTING_XP = "Crafting_XP";
     private static final String COLUMN_SMITHING_RANK = "Smithing_Rank";
     private static final String COLUMN_SMITHING_XP = "Smithing_XP";
     private static final String COLUMN_MINING_RANK = "Mining_Rank";
@@ -59,8 +66,12 @@ public class DatabaseManager extends SQLiteOpenHelper {
     private static final String COLUMN_HUNTER_XP = "Hunter_XP";
     private static final String COLUMN_CONSTRUCTION_RANK = "Construction_Rank";
     private static final String COLUMN_CONSTRUCTION_XP = "Construction_XP";
-    private static final String COLUMN_USER_ID = "UserID";
 
+    private static final String[] skillColumns = {COLUMN_OVERALL_RANK, COLUMN_OVERALL_XP, COLUMN_ATTACK_RANK, COLUMN_ATTACK_XP, COLUMN_DEFENCE_RANK, COLUMN_DEFENCE_XP, COLUMN_STRENGTH_RANK, COLUMN_STRENGTH_XP, COLUMN_HITPOINTS_RANK, COLUMN_HITPOINTS_XP,
+            COLUMN_RANGED_RANK, COLUMN_RANGED_XP, COLUMN_PRAYER_RANK, COLUMN_PRAYER_XP, COLUMN_MAGIC_RANK, COLUMN_MAGIC_XP, COLUMN_COOKING_RANK, COLUMN_COOKING_XP, COLUMN_WOODCUTTING_RANK, COLUMN_WOODCUTTING_XP, COLUMN_FLETCHING_RANK, COLUMN_FLETCHING_XP,
+            COLUMN_FISHING_RANK, COLUMN_FISHING_XP, COLUMN_FIREMAKING_RANK, COLUMN_FIREMAKING_XP, COLUMN_CRAFTING_RANK, COLUMN_CRAFTING_XP, COLUMN_SMITHING_RANK, COLUMN_SMITHING_XP, COLUMN_MINING_RANK, COLUMN_MINING_XP, COLUMN_HERBLORE_RANK, COLUMN_HERBLORE_XP,
+            COLUMN_AGILITY_RANK, COLUMN_AGILITY_XP, COLUMN_THIEVING_RANK, COLUMN_THIEVING_XP, COLUMN_SLAYER_RANK, COLUMN_SLAYER_XP, COLUMN_FARMING_RANK, COLUMN_FARMING_XP, COLUMN_RUNECRAFT_RANK, COLUMN_RUNECRAFT_XP, COLUMN_HUNTER_RANK, COLUMN_HUNTER_XP,
+            COLUMN_CONSTRUCTION_RANK, COLUMN_CONSTRUCTION_XP};
 
     public DatabaseManager(@Nullable Context context) {
         super(context, "OSRSTracker.db", null, 1);
@@ -72,14 +83,24 @@ public class DatabaseManager extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_NAME, userName);
-        return -1 != db.insert(USER_TB, null, cv);
+        long result = db.insert(USER_TB, null, cv);
+        return result != -1;
     }
 
-    public boolean addTimestamp(String userName, String response) {
+    public boolean addTimestamp(String userName, PlayerStats playerStats) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
+        int currentColumn = 0;
         cv.put(COLUMN_USER_ID, this.getUserIDByName(userName));
-        return -1 != db.insert(SKILL_TB, null, cv);
+        for (PlayerStats.Skill currentSkill : PlayerStats.Skill.values()) {
+            cv.put(skillColumns[currentColumn], playerStats.getRank(currentSkill));
+            currentColumn++;
+            cv.put(skillColumns[currentColumn], playerStats.getXP(currentSkill));
+            currentColumn++;
+            Log.i("TEST", skillColumns[currentColumn - 1]);
+        }
+        long result = db.insert(SKILL_TB, null, cv);
+        return result != -1;
     }
 
     private int getUserIDByName(String userName) {
@@ -91,7 +112,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
             result = cursor.getInt(0);
 
         cursor.close();
-        //db.close(); BRACUH ICH DAS????
         return result;
     }
 
@@ -118,6 +138,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 "\t" + COLUMN_DEFENCE_XP + " INTEGER,\n" +
                 "\t" + COLUMN_STRENGTH_RANK + " INTEGER,\n" +
                 "\t" + COLUMN_STRENGTH_XP + " INTEGER,\n" +
+                "\t" + COLUMN_HITPOINTS_RANK + " INTEGER,\n" +
+                "\t" + COLUMN_HITPOINTS_XP + " INTEGER,\n" +
                 "\t" + COLUMN_RANGED_RANK + " INTEGER,\n" +
                 "\t" + COLUMN_RANGED_XP + " INTEGER,\n" +
                 "\t" + COLUMN_PRAYER_RANK + " INTEGER,\n" +
@@ -134,6 +156,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 "\t" + COLUMN_FISHING_XP + " INTEGER,\n" +
                 "\t" + COLUMN_FIREMAKING_RANK + " INTEGER,\n" +
                 "\t" + COLUMN_FIREMAKING_XP + " INTEGER,\n" +
+                "\t" + COLUMN_CRAFTING_RANK + " INTEGER,\n" +
+                "\t" + COLUMN_CRAFTING_XP + " INTEGER,\n" +
                 "\t" + COLUMN_SMITHING_RANK + " INTEGER,\n" +
                 "\t" + COLUMN_SMITHING_XP + " INTEGER,\n" +
                 "\t" + COLUMN_MINING_RANK + " INTEGER,\n" +
