@@ -3,6 +3,7 @@ package com.example.osrstracker;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
@@ -21,6 +22,12 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        DatabaseManager databaseManager = new DatabaseManager(MainActivity.this);
+        if (databaseManager.getAllUsernames() != null) {
+            databaseManager.close();
+            loadStatisticsActivity();
+            return;
+        }
 
         userNameEdit = (EditText) findViewById(R.id.editTextPersonName);
         userNameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -34,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
                 return handled;
             }
         });
-
     }
 
     @Override
@@ -60,9 +66,15 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
             Toast.makeText(MainActivity.this, "Failed to create Timestamp", Toast.LENGTH_LONG).show();
             return;
         }
+        databaseManager.close();
+        loadStatisticsActivity();
+    }
 
-        Toast.makeText(MainActivity.this, "SUCCESS!!!!", Toast.LENGTH_LONG).show();
-        //setContentView(R.layout.activity_statistics);
+    private void loadStatisticsActivity() {
+        Intent i = new Intent(MainActivity.this, Statistics.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+        finish();
     }
 
 }

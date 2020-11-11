@@ -116,8 +116,23 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
 
-    public  boolean deleteUser(String userName) {
-        return true;
+    public boolean deleteUser(String userName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return 0 < db.delete(USER_TB, "? = ?", new String[] {COLUMN_NAME, userName});
+    }
+
+    public String[] getAllUsernames() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + USER_TB,null);
+        if (!cursor.moveToFirst())
+            return null;
+        String[] result =  new String[cursor.getCount()];
+        int index = 0;
+        do {
+            result[index] = cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
+            index++;
+        } while (cursor.moveToNext());
+        return result;
     }
 
 
