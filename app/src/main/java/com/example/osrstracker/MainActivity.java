@@ -2,20 +2,21 @@ package com.example.osrstracker;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements OnHttpRequestCompleteListener{
 
     private EditText userNameEdit;
+    private ProgressBar progressBar;
+
     private String currentUser;
 
     @Override
@@ -23,12 +24,12 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         DatabaseManager databaseManager = new DatabaseManager(MainActivity.this);
-        if (databaseManager.getAllUsernames() != null) {
+        if (!(getIntent().getBooleanExtra("ADD_NEW_USER", false) || databaseManager.getAllUsernames() == null)) {
             databaseManager.close();
             loadStatisticsActivity();
             return;
         }
-
+        progressBar = findViewById(R.id.progressBar);
         userNameEdit = (EditText) findViewById(R.id.editTextPersonName);
         userNameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     currentUser = userNameEdit.getText().toString();
+                    progressBar.setVisibility(View.VISIBLE);
                     new HttpRequestTask(MainActivity.this).execute(currentUser);
                 }
                 return handled;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
 
     @Override
     public void onHttpRequestComplete(String response, int responseCode) {
+        progressBar.setVisibility(View.INVISIBLE);
         if (responseCode != 200 || response == null) {
             String dialogMessage;
             if (responseCode == 404)
@@ -54,12 +57,17 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
             Toast.makeText(MainActivity.this, dialogMessage, Toast.LENGTH_LONG).show();
             return;
         }
-        PlayerStats newPlayer = new PlayerStats(response);
-
+        PlayerStats newPlayer;
+        try {
+            newPlayer = new PlayerStats(response);
+        } catch (Exception e) {
+            Toast.makeText(MainActivity.this, "The Service is temporary unavailable", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         DatabaseManager databaseManager = new DatabaseManager(MainActivity.this);
         if (!databaseManager.registerUser(currentUser)) {
-            Toast.makeText(MainActivity.this, "Failed to register User", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "Failed to register new User", Toast.LENGTH_LONG).show();
             return;
         }
         if (!databaseManager.addTimestamp(currentUser, newPlayer)) {
@@ -71,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
     }
 
     private void loadStatisticsActivity() {
-        Intent i = new Intent(MainActivity.this, Statistics.class);
+        Intent i = new Intent(MainActivity.this, StatisticsActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
         finish();

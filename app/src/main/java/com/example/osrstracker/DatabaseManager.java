@@ -79,7 +79,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     public  boolean registerUser(String userName) {
         if (this.getUserIDByName(userName) > -1)
-            return true;
+            return false;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_NAME, userName);
@@ -118,7 +118,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     public boolean deleteUser(String userName) {
         SQLiteDatabase db = this.getWritableDatabase();
-        return 0 < db.delete(USER_TB, "? = ?", new String[] {COLUMN_NAME, userName});
+        int deletedRows = db.delete(USER_TB, COLUMN_NAME + " = ?", new String[] {userName});
+        return  deletedRows > 0;
     }
 
     public String[] getAllUsernames() {
