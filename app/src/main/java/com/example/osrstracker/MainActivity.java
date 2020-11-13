@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         DatabaseManager databaseManager = new DatabaseManager(MainActivity.this);
-        if (!(getIntent().getBooleanExtra("ADD_NEW_USER", false) || databaseManager.getAllUsernames() == null)) {
+        if (!(getIntent().getBooleanExtra("ADD_NEW_USER", false) || databaseManager.getAllUsers() == null)) {
             databaseManager.close();
             loadStatisticsActivity();
             return;
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements OnHttpRequestComp
             Toast.makeText(MainActivity.this, "Failed to register new User", Toast.LENGTH_LONG).show();
             return;
         }
-        if (!databaseManager.addTimestamp(currentUser, newPlayer)) {
+        if (!databaseManager.addTimestamp(databaseManager.getUserIDByName(currentUser), newPlayer)) {
             Toast.makeText(MainActivity.this, "Failed to create Timestamp", Toast.LENGTH_LONG).show();
             return;
         }

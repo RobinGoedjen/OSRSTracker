@@ -2,6 +2,7 @@ package com.example.osrstracker;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -87,11 +88,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return result != -1;
     }
 
-    public boolean addTimestamp(String userName, PlayerStats playerStats) {
+    public boolean addTimestamp(int userID, PlayerStats playerStats) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         int currentColumn = 0;
-        cv.put(COLUMN_USER_ID, this.getUserIDByName(userName));
+        cv.put(COLUMN_USER_ID, userID);
         for (PlayerStats.Skill currentSkill : PlayerStats.Skill.values()) {
             cv.put(skillColumns[currentColumn], playerStats.getRank(currentSkill));
             currentColumn++;
@@ -103,7 +104,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return result != -1;
     }
 
-    private int getUserIDByName(String userName) {
+    public int getUserIDByName(String userName) {
         int result = -1;
         String query = "SELECT " + COLUMN_ID + " FROM " + USER_TB + " WHERE " + COLUMN_NAME + " = ?";
         SQLiteDatabase db = this.getReadableDatabase();
@@ -116,21 +117,24 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
 
-    public boolean deleteUser(String userName) {
+    public boolean deleteUser(int userID) {
         SQLiteDatabase db = this.getWritableDatabase();
-        int deletedRows = db.delete(USER_TB, COLUMN_NAME + " = ?", new String[] {userName});
+        int deletedRows = db.delete(USER_TB, COLUMN_ID + " = ?", new String[] {Integer.toString(userID)});
         return  deletedRows > 0;
     }
 
-    public String[] getAllUsernames() {
+
+    public User[] getAllUsers() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + USER_TB,null);
         if (!cursor.moveToFirst())
             return null;
-        String[] result =  new String[cursor.getCount()];
+        User[] result =  new User[cursor.getCount()];
         int index = 0;
         do {
-            result[index] = cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
+            String name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
+            int userID = cursor.getInt(cursor.getColumnIndex(COLUMN_ID));
+            result[index] = new User(userID, name);
             index++;
         } while (cursor.moveToNext());
         return result;

@@ -6,6 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".StatisticsActivity">
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
     <Spinner
         android:id="@+id/users_spinner"
         android:layout_width="225dp"
@@ -42,6 +54,49 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.025"
         app:srcCompat="@android:drawable/ic_input_add" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup_diffLevel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/users_spinner">
+
+        <RadioButton
+            android:id="@+id/radioButton_today"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/today" />
+
+        <RadioButton
+            android:id="@+id/radioButton_last7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/_7_days" />
+
+        <RadioButton
+            android:id="@+id/radioButton_last30"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/_30_days" />
+        <RadioButton
+            android:id="@+id/radioButton_allTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/_365_days" />
+    </RadioGroup>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

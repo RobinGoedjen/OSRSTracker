@@ -2,6 +2,7 @@ package com.example.osrstracker;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,12 +10,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Toast;
 
-public class StatisticsActivity extends AppCompatActivity {
+public class StatisticsActivity extends AppCompatActivity implements OnHttpRequestCompleteListener{
     private DatabaseManager db = null;
     private Spinner usersSpinner;
     private ImageButton buttonDelete;
     private ImageButton buttonAdd;
+    private SwipeRefreshLayout swipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +27,7 @@ public class StatisticsActivity extends AppCompatActivity {
         usersSpinner = findViewById(R.id.users_spinner);
         buttonDelete = findViewById(R.id.buttonDelete);
         buttonAdd = findViewById(R.id.buttonAdd);
+        swipeRefresh = findViewById(R.id.swipeRefresh);
 
         if (!fillComboBox()) {
             loadMainActivity();
@@ -32,6 +36,8 @@ public class StatisticsActivity extends AppCompatActivity {
 
         buttonDelete.setOnClickListener(this::onButtonDeleteClick);
         buttonAdd.setOnClickListener(this::onButtonAddClick);
+        swipeRefresh.setOnRefreshListener(this::onRefresh);
+
     }
 
     @Override
@@ -42,10 +48,10 @@ public class StatisticsActivity extends AppCompatActivity {
     }
 
     private boolean fillComboBox(){
-        String[] users = db.getAllUsernames();
+        User[] users = db.getAllUsers();
         if (users == null || users.length == 0)
             return false;
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(StatisticsActivity.this, R.layout.support_simple_spinner_dropdown_item, users);
+        ArrayAdapter<User> adapter = new ArrayAdapter<User>(StatisticsActivity.this, R.layout.support_simple_spinner_dropdown_item, users);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         usersSpinner.setAdapter(adapter);
         return true;
@@ -65,7 +71,7 @@ public class StatisticsActivity extends AppCompatActivity {
         confirmationDialog.setMessage("This will delete all saved data for this user!");
         confirmationDialog.setNegativeButton("No", null);
         confirmationDialog.setPositiveButton("Yes", (view, which) -> {
-            db.deleteUser(usersSpinner.getSelectedItem().toString());
+            db.deleteUser(((User)usersSpinner.getSelectedItem()).getUserID());
             if (!fillComboBox())
                 loadMainActivity();
         });
@@ -78,4 +84,34 @@ public class StatisticsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void onRefresh() {
+        new HttpRequestTask(StatisticsActivity.this).execute(((User)usersSpinner.getSelectedItem()).getUserName());
+    }
+
+    @Override
+    public void onHttpRequestComplete(String response, int responseCode) {
+        try {
+            if (responseCode != 200 || response == null) {
+                String dialogMessage;
+                if (responseCode == 404)
+                    dialogMessage = "User has not been found";
+                else
+                    dialogMessage = "Please check if you have an active internet Connection";
+                Toast.makeText(StatisticsActivity.this, dialogMessage, Toast.LENGTH_LONG).show();
+                return;
+            }
+            PlayerStats newPlayer;
+            try {
+                newPlayer = new PlayerStats(response);
+            } catch (Exception e) {
+                Toast.makeText(StatisticsActivity.this, "The Service is temporary unavailable", Toast.LENGTH_LONG).show();
+                return;
+            }
+            db.addTimestamp(((User)usersSpinner.getSelectedItem()).getUserID(), new PlayerStats(response));
+            Toast.makeText(StatisticsActivity.this, "Success", Toast.LENGTH_SHORT).show();
+        } finally {
+            swipeRefresh.setRefreshing(false);
+        }
+
+    }
 }
