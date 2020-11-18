@@ -17,6 +17,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class DatabaseManager extends SQLiteOpenHelper {
 
@@ -231,8 +232,9 @@ public class DatabaseManager extends SQLiteOpenHelper {
             Date lastDate = dateFormat.parse(cursor.getString(cursor.getColumnIndex(COLUMN_CREATION_TIME)));
             do {
                 Date currentDate = dateFormat.parse(cursor.getString(cursor.getColumnIndex(COLUMN_CREATION_TIME)));
-                lastDataPoint += Math.abs(currentDate.getTime() - lastDate.getTime());
+                lastDataPoint += TimeUnit.DAYS.convert(Math.abs(currentDate.getTime() - lastDate.getTime()), TimeUnit.MILLISECONDS);
                 result[counter] = new DataPoint(lastDataPoint, cursor.getInt(cursor.getColumnIndex(skillColumn)));
+                lastDate = currentDate;
                 counter++;
                 lastDataPoint++;
             } while (cursor.moveToNext());
