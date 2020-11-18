@@ -6,6 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".StatisticsActivity">
 
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/graph"
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        app:layout_constraintTop_toBottomOf="@id/radioGroup_timeSpan"
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
@@ -14,7 +22,9 @@
         <ListView
             android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+        </ListView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
@@ -56,7 +66,7 @@
         app:srcCompat="@android:drawable/ic_input_add" />
 
     <RadioGroup
-        android:id="@+id/radioGroup_diffLevel"
+        android:id="@+id/radioGroup_timeSpan"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -96,7 +106,6 @@
             android:layout_weight="0"
             android:text="@string/_365_days" />
     </RadioGroup>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
