@@ -12,12 +12,21 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.text.ParseException;
+
 public class StatisticsActivity extends AppCompatActivity implements OnHttpRequestCompleteListener{
     private DatabaseManager db = null;
     private Spinner usersSpinner;
     private ImageButton buttonDelete;
     private ImageButton buttonAdd;
     private SwipeRefreshLayout swipeRefresh;
+    private GraphView overallGraph;
+
+    private PlayerStats.Skill currentGraphSkill = PlayerStats.Skill.Overall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,16 +37,19 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
         buttonDelete = findViewById(R.id.buttonDelete);
         buttonAdd = findViewById(R.id.buttonAdd);
         swipeRefresh = findViewById(R.id.swipeRefresh);
+        overallGraph = findViewById(R.id.overall_graph);
 
         if (!fillComboBox()) {
             loadMainActivity();
             return;
         }
-
         buttonDelete.setOnClickListener(this::onButtonDeleteClick);
         buttonAdd.setOnClickListener(this::onButtonAddClick);
         swipeRefresh.setOnRefreshListener(this::onRefresh);
 
+        overallGraph.getViewport().setXAxisBoundsManual(true);
+        overallGraph.getViewport().setMinX(0);
+        drawGraph(PlayerStats.Skill.Overall);
     }
 
     @Override
@@ -109,9 +121,22 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
             }
             db.addTimestamp(((User)usersSpinner.getSelectedItem()).getUserID(), new PlayerStats(response));
             Toast.makeText(StatisticsActivity.this, "Success", Toast.LENGTH_SHORT).show();
+
+            drawGraph(currentGraphSkill);
         } finally {
             swipeRefresh.setRefreshing(false);
         }
 
+    }
+
+    private void drawGraph(PlayerStats.Skill skill) {
+        overallGraph.removeAllSeries();
+        overallGraph.setTitle(skill.name() + " Rank");
+        LineGraphSeries<DataPoint> series = null;
+        DataPoint[] data = db.getRankDataSet(skill, ((User)usersSpinner.getSelectedItem()).getUserID());
+        overallGraph.getViewport().setMaxX(data[data.length - 1].getX());
+        series = new LineGraphSeries<DataPoint>(data);
+        series.setDrawDataPoints(true);
+        overallGraph.addSeries(series);
     }
 }

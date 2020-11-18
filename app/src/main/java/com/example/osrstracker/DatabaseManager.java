@@ -6,9 +6,17 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import com.jjoe64.graphview.series.DataPoint;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DatabaseManager extends SQLiteOpenHelper {
 
@@ -206,5 +214,33 @@ public class DatabaseManager extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    public DataPoint[] getRankDataSet(PlayerStats.Skill skill, int userID) {
+        SQLiteDatabase db =  this.getReadableDatabase();
+        String skillColumn = skillColumns[skill.ordinal() * 2];
+        String query = "SELECT " + skillColumn + ", " + COLUMN_CREATION_TIME + " FROM " + SKILL_TB + " WHERE " + COLUMN_USER_ID + " = ?";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        int counter = 0;
+        int lastDataPoint = 0;
+        Cursor cursor = db.rawQuery(query, new String[]{Integer.toString(userID)});
+        if (!cursor.moveToFirst())
+            return null;
+        DataPoint[] result = new DataPoint[cursor.getCount()];
+        try {
+            Date lastDate = dateFormat.parse(cursor.getString(cursor.getColumnIndex(COLUMN_CREATION_TIME)));
+            do {
+                Date currentDate = dateFormat.parse(cursor.getString(cursor.getColumnIndex(COLUMN_CREATION_TIME)));
+                lastDataPoint += Math.abs(currentDate.getTime() - lastDate.getTime());
+                result[counter] = new DataPoint(lastDataPoint, cursor.getInt(cursor.getColumnIndex(skillColumn)));
+                counter++;
+                lastDataPoint++;
+            } while (cursor.moveToNext());
+        } catch(Exception E) {
+            E.printStackTrace();
+        } finally {
+            cursor.close();
+        }
+        return result;
     }
 }

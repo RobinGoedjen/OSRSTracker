@@ -7,12 +7,13 @@
     tools:context=".StatisticsActivity">
 
     <com.jjoe64.graphview.GraphView
-        android:id="@+id/graph"
+        android:id="@+id/overall_graph"
         android:layout_width="match_parent"
         android:layout_height="200dip"
         app:layout_constraintTop_toBottomOf="@id/radioGroup_timeSpan"
         android:layout_marginTop="20dp"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginHorizontal="17dp"/>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
@@ -99,12 +100,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:text="@string/_30_days" />
+
         <RadioButton
             android:id="@+id/radioButton_allTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="@string/_365_days" />
+            android:text="@string/all_Time" />
     </RadioGroup>
 
 
