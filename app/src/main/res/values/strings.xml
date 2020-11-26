@@ -8,4 +8,7 @@
     <string name="_7_days">7 Days</string>
     <string name="_30_days">30 days</string>
     <string name="all_Time">All Time</string>
+    <string name="rank">Rank</string>
+    <string name="xp">XP</string>
+    <string name="skillimageplaceholder">SkillImagePlaceholder</string>
 </resources>

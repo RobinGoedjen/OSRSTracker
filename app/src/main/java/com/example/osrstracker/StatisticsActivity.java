@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
@@ -50,6 +51,7 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
         overallGraph.getViewport().setXAxisBoundsManual(true);
         overallGraph.getViewport().setMinX(0);
         drawGraph(PlayerStats.Skill.Overall);
+
     }
 
     @Override
