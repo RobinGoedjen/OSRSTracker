@@ -11,4 +11,5 @@
     <string name="rank">Rank</string>
     <string name="xp">XP</string>
     <string name="skillimageplaceholder">SkillImagePlaceholder</string>
+    <string name="lv">LV:</string>
 </resources>

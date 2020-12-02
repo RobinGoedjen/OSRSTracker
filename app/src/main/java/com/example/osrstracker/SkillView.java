@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class SkillView extends ConstraintLayout {
 
+    public PlayerStats.Skill selectedSkill;
     public SkillView(Context context) {
         super(context);
         init(null);
@@ -38,12 +39,16 @@ public class SkillView extends ConstraintLayout {
         super.onFinishInflate();
     }
 
-    public void fillView(@DrawableRes int resID, int currentLevel) {
+    public void fillView(@DrawableRes int resID, int currentLevel, PlayerStats.Skill skill) {
         ImageView image = this.findViewById(R.id.imageViewSkill);
         image.setImageResource(resID);
+        setLevel(currentLevel);
+        selectedSkill = skill;
+    }
+
+    public void setLevel(int currentLevel) {
         TextView text = this.findViewById(R.id.textViewLevel);
-        text.setText("LV: " + currentLevel);
-        //TODO:set Buttons
+        text.setText("LV: " + String.format("%03d", currentLevel));
     }
 
 }

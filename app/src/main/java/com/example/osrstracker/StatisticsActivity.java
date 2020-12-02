@@ -1,5 +1,6 @@
 package com.example.osrstracker;
 
+import androidx.annotation.DrawableRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -8,7 +9,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -21,6 +24,8 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StatisticsActivity extends AppCompatActivity implements OnHttpRequestCompleteListener{
     private DatabaseManager db = null;
@@ -29,8 +34,13 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
     private ImageButton buttonAdd;
     private SwipeRefreshLayout swipeRefresh;
     private GraphView overallGraph;
-
     private PlayerStats.Skill currentGraphSkill = PlayerStats.Skill.Overall;
+    private ArrayList<SkillView> allSkillViews = new ArrayList<SkillView>();
+
+    private @DrawableRes int[] skillIcons = {R.drawable.skills_icon, R.drawable.attack_icon, R.drawable.defence_icon, R.drawable.strength_icon, R.drawable.hitpoints_icon, R.drawable.ranged_icon, R.drawable.prayer_icon, R.drawable.magic_icon, R.drawable.cooking_icon,
+            R.drawable.woodcutting_icon, R.drawable.fletching_icon, R.drawable.fishing_icon, R.drawable.firemaking_icon, R.drawable.crafting_icon, R.drawable.smithing_icon, R.drawable.mining_icon, R.drawable.herblore_icon, R.drawable.agility_icon, R.drawable.thieving_icon,
+            R.drawable.slayer_icon, R.drawable.farming_icon, R.drawable.runecraft_icon, R.drawable.hunter_icon, R.drawable.construction_icon};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,37 +57,38 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
             loadMainActivity();
             return;
         }
+        usersSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentGraphSkill = PlayerStats.Skill.Overall;
+                drawGraphRank(currentGraphSkill);
+                setLevelSkills();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         buttonDelete.setOnClickListener(this::onButtonDeleteClick);
         buttonAdd.setOnClickListener(this::onButtonAddClick);
         swipeRefresh.setOnRefreshListener(this::onRefresh);
 
         overallGraph.getViewport().setXAxisBoundsManual(true);
         overallGraph.getViewport().setMinX(0);
-        drawGraph(PlayerStats.Skill.Overall);
+        drawGraphRank(currentGraphSkill);
 
 
-        //TODO Work in Progess
         LinearLayout layout =  findViewById(R.id.skillLayout);
-        SkillView test = new SkillView(StatisticsActivity.this);
-        test.fillView(R.drawable.runecraft_icon, 99);
-        layout.addView(test);
-        test = new SkillView(StatisticsActivity.this);
-        test.fillView(R.drawable.agility_icon, 99);
-        layout.addView(test);
-        test = new SkillView(StatisticsActivity.this);
-        layout.addView(test);
-        test = new SkillView(StatisticsActivity.this);
-        layout.addView(test);
-        test = new SkillView(StatisticsActivity.this);
-        layout.addView(test);
-        test = new SkillView(StatisticsActivity.this);
-        layout.addView(test);
-        test = new SkillView(StatisticsActivity.this);
-        layout.addView(test);
-        test = new SkillView(StatisticsActivity.this);
-        layout.addView(test);
-        test = new SkillView(StatisticsActivity.this);
-        layout.addView(test);
+        for (PlayerStats.Skill currentSkill : PlayerStats.Skill.values()) {
+            SkillView skillView = new SkillView(StatisticsActivity.this);
+            skillView.fillView(skillIcons[currentSkill.ordinal()], currentSkill.ordinal(), currentSkill);
+            layout.addView(skillView);
+            skillView.findViewById(R.id.buttonRank).setOnClickListener((View v) -> drawGraphRank(skillView.selectedSkill));
+            skillView.findViewById(R.id.buttonXP).setOnClickListener((View v) -> drawGraphXP(skillView.selectedSkill));
+            allSkillViews.add(skillView);
+        }
+        setLevelSkills();
     }
 
     @Override
@@ -150,14 +161,14 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
             db.addTimestamp(((User)usersSpinner.getSelectedItem()).getUserID(), new PlayerStats(response));
             Toast.makeText(StatisticsActivity.this, "Success", Toast.LENGTH_SHORT).show();
 
-            drawGraph(currentGraphSkill);
+            drawGraphRank(currentGraphSkill);
         } finally {
             swipeRefresh.setRefreshing(false);
         }
 
     }
 
-    private void drawGraph(PlayerStats.Skill skill) {
+    private void drawGraphRank(PlayerStats.Skill skill) {
         overallGraph.removeAllSeries();
         overallGraph.setTitle(skill.name() + " Rank");
         LineGraphSeries<DataPoint> series = null;
@@ -167,4 +178,30 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
         series.setDrawDataPoints(true);
         overallGraph.addSeries(series);
     }
+
+    private void drawGraphXP(PlayerStats.Skill skill) {
+        overallGraph.removeAllSeries();
+        overallGraph.setTitle(skill.name() + " XP");
+        LineGraphSeries<DataPoint> series = null;
+        DataPoint[] data = db.getXPDataSet(skill, ((User)usersSpinner.getSelectedItem()).getUserID());
+        overallGraph.getViewport().setMaxX(data[data.length - 1].getX());
+        series = new LineGraphSeries<DataPoint>(data);
+        series.setDrawDataPoints(true);
+        overallGraph.addSeries(series);
+    }
+
+    private void setLevelSkills() {
+        PlayerStats stats = db.getLatestPlayerStats(((User)usersSpinner.getSelectedItem()).getUserID());
+        for (PlayerStats.Skill currentSkill : PlayerStats.Skill.values()) {
+            if (currentSkill == PlayerStats.Skill.Overall) {
+                allSkillViews.get(currentSkill.ordinal()).setLevel(0);
+                continue;
+            }
+            allSkillViews.get(currentSkill.ordinal()).setLevel(PlayerStats.getLevelAtExperience(stats.skillExperienceMap.get(currentSkill)));
+        }
+    }
+
+
+
+
 }

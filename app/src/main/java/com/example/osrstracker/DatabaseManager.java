@@ -245,4 +245,54 @@ public class DatabaseManager extends SQLiteOpenHelper {
         }
         return result;
     }
+
+    public DataPoint[] getXPDataSet(PlayerStats.Skill skill, int userID) {
+        SQLiteDatabase db =  this.getReadableDatabase();
+        String skillColumn = skillColumns[skill.ordinal() * 2 + 1];
+        String query = "SELECT " + skillColumn + ", " + COLUMN_CREATION_TIME + " FROM " + SKILL_TB + " WHERE " + COLUMN_USER_ID + " = ?";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        int counter = 0;
+        int lastDataPoint = 0;
+        Cursor cursor = db.rawQuery(query, new String[]{Integer.toString(userID)});
+        if (!cursor.moveToFirst())
+            return null;
+        DataPoint[] result = new DataPoint[cursor.getCount()];
+        try {
+            Date lastDate = dateFormat.parse(cursor.getString(cursor.getColumnIndex(COLUMN_CREATION_TIME)));
+            do {
+                Date currentDate = dateFormat.parse(cursor.getString(cursor.getColumnIndex(COLUMN_CREATION_TIME)));
+                lastDataPoint += TimeUnit.DAYS.convert(Math.abs(currentDate.getTime() - lastDate.getTime()), TimeUnit.MILLISECONDS);
+                result[counter] = new DataPoint(lastDataPoint, cursor.getInt(cursor.getColumnIndex(skillColumn)));
+                lastDate = currentDate;
+                counter++;
+                lastDataPoint++;
+            } while (cursor.moveToNext());
+        } catch(Exception E) {
+            E.printStackTrace();
+        } finally {
+            cursor.close();
+        }
+        return result;
+    }
+
+    public PlayerStats getLatestPlayerStats(int userID) {
+        SQLiteDatabase db =  this.getReadableDatabase();
+        PlayerStats playerStats = null;
+        Cursor cursor = db.rawQuery("SELECT MAX(" + COLUMN_ID + "), * FROM " + SKILL_TB + " WHERE " + COLUMN_USER_ID + " = ?", new String[]{Integer.toString(userID)});
+        try {
+            if (!cursor.moveToFirst()) {
+                return null;
+            }
+            playerStats = new PlayerStats();
+            for (PlayerStats.Skill currentSkill : PlayerStats.Skill.values()) {
+                playerStats.skillRankMap.put(currentSkill, cursor.getInt(cursor.getColumnIndex(skillColumns[currentSkill.ordinal() * 2])));
+                playerStats.skillExperienceMap.put(currentSkill, cursor.getInt(cursor.getColumnIndex(skillColumns[currentSkill.ordinal() * 2 + 1])));
+            }
+        } catch (Exception e) {
+
+        } finally {
+            cursor.close();
+        }
+        return playerStats;
+    }
 }
