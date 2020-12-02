@@ -59,6 +59,7 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
         //TODO Work in Progess
         LinearLayout layout =  findViewById(R.id.skillLayout);
         SkillView test = new SkillView(StatisticsActivity.this);
+        test.fillView(R.drawable.runecraft_icon, 99);
         layout.addView(test);
         test = new SkillView(StatisticsActivity.this);
         test.fillView(R.drawable.agility_icon, 99);
