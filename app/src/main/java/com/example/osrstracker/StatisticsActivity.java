@@ -2,6 +2,8 @@ package com.example.osrstracker;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
@@ -9,6 +11,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +55,28 @@ public class StatisticsActivity extends AppCompatActivity implements OnHttpReque
         overallGraph.getViewport().setMinX(0);
         drawGraph(PlayerStats.Skill.Overall);
 
+
+        //TODO Work in Progess
+        LinearLayout layout =  findViewById(R.id.skillLayout);
+        SkillView test = new SkillView(StatisticsActivity.this);
+        layout.addView(test);
+        test = new SkillView(StatisticsActivity.this);
+        test.fillView(R.drawable.agility_icon, 99);
+        layout.addView(test);
+        test = new SkillView(StatisticsActivity.this);
+        layout.addView(test);
+        test = new SkillView(StatisticsActivity.this);
+        layout.addView(test);
+        test = new SkillView(StatisticsActivity.this);
+        layout.addView(test);
+        test = new SkillView(StatisticsActivity.this);
+        layout.addView(test);
+        test = new SkillView(StatisticsActivity.this);
+        layout.addView(test);
+        test = new SkillView(StatisticsActivity.this);
+        layout.addView(test);
+        test = new SkillView(StatisticsActivity.this);
+        layout.addView(test);
     }
 
     @Override

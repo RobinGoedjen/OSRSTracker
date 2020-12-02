@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal">
 
     <Button
         android:id="@+id/buttonRank"
@@ -11,8 +12,9 @@
         android:layout_height="wrap_content"
         android:text="@string/rank"
         android:textSize="20sp"
-        app:layout_constraintLeft_toRightOf="@id/imageViewSkill"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintLeft_toRightOf="@id/textViewLevel"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="10dp" />
 
     <Button
         android:id="@+id/buttonXP"
@@ -31,4 +33,15 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars"
         android:contentDescription="@string/skillimageplaceholder" />
-</merge>
+
+    <TextView
+        android:id="@+id/textViewLevel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="LV:"
+        android:textSize="16sp"
+        app:layout_constraintLeft_toRightOf="@id/imageViewSkill"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>
